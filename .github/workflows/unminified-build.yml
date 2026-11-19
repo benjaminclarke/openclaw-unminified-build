@@ -55,11 +55,14 @@ jobs:
         working-directory: src
         run: pnpm build
 
-      - name: Pack
+      # Not `npm pack`: upstream's prepack refuses a plain root pack (the workspace dep
+      # @openclaw/ai is published separately by their release automation). benbox only swaps
+      # dist/ into a tree installed from npm, so dist/ + package.json is the whole artifact.
+      - name: Pack dist
         working-directory: src
         run: |
           mkdir -p ../out
-          npm pack --pack-destination ../out
+          tar -czf "../out/openclaw-${TAG}-dist-unminified.tgz" dist package.json
           cd ../out
           sha256sum *.tgz > SHA256SUMS
           {
