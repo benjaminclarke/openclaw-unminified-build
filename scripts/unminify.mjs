@@ -20,5 +20,10 @@ if (hits.length !== 1) {
   console.error(`unminify: expected exactly 1 mangle block in ${file}, found ${hits.length}`);
   process.exit(1);
 }
-writeFileSync(file, src.replace(re, "minify: undefined, // benbox unminified build"));
+// Keep upstream's minify pass (its codegen/compress settings change constant inlining: with the
+// pass off entirely, 3,131 of 15,045 shipped files differed from npm beyond renaming); turn off
+// ONLY the renaming.
+writeFileSync(file, src.replace(re,
+  'minify: typeof declarations === "object" && declarations.emitDtsOnly ? undefined : ' +
+  '{ codegen: false, compress: false, mangle: false }, // benbox: mangle off'));
 console.log(`unminify: mangle block removed from ${file}`);
